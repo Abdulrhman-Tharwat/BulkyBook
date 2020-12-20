@@ -36,6 +36,75 @@ namespace BulkyBook.DataAccess.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("BulkyBook.Models.CoverType", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(50)")
+                        .HasMaxLength(50);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("CoverTypes");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.Product", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("Author")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("CategoryID")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CovertypeId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ISBN")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("ImageUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<double>("ListPrice")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Price")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Price100")
+                        .HasColumnType("float");
+
+                    b.Property<double>("Price50")
+                        .HasColumnType("float");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryID");
+
+                    b.HasIndex("CovertypeId");
+
+                    b.ToTable("Products");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
                 {
                     b.Property<string>("Id")
@@ -234,6 +303,21 @@ namespace BulkyBook.DataAccess.Migrations
                     b.HasKey("UserId", "LoginProvider", "Name");
 
                     b.ToTable("AspNetUserTokens");
+                });
+
+            modelBuilder.Entity("BulkyBook.Models.Product", b =>
+                {
+                    b.HasOne("BulkyBook.Models.Category", "category")
+                        .WithMany()
+                        .HasForeignKey("CategoryID")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("BulkyBook.Models.CoverType", "coverType")
+                        .WithMany()
+                        .HasForeignKey("CovertypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>

@@ -61,6 +61,19 @@ namespace BulkyBook.Areas.Admin.Controllers
             var obj = _unitOfWork.Category.GetAll();
             return Json(new { data = obj });
         }    
+        [HttpDelete]
+        public IActionResult Delete(int id)
+        {
+            var Obj = _unitOfWork.Category.Get(id);
+            if (Obj == null)
+            {
+                return Json(new {success=false,message="Error" });
+            }
+            _unitOfWork.Category.Remove(Obj);
+            _unitOfWork.Save();
+            return Json(new { success = true, message = "Delete successful" });
+
+        }
 
 
         #endregion
