@@ -1,5 +1,7 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,7 @@ using System.Threading.Tasks;
 namespace BulkyBook.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
     public class CategoryController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -20,15 +23,16 @@ namespace BulkyBook.Areas.Admin.Controllers
         public IActionResult Index()
         {
             return View();
-        } public IActionResult Upsert(int? id)
+        }
+        public IActionResult Upsert(int? id)
         {
             Category category = new Category();
-            if(id == null)
+            if (id == null)
             {
                 return View(category);
             }
             category = _unitOfWork.Category.Get(id.GetValueOrDefault());
-            if(category == null)
+            if (category == null)
             {
                 return NotFound();
             }
@@ -40,7 +44,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                if(category.Id == 0)
+                if (category.Id == 0)
                 {
                     _unitOfWork.Category.Add(category);
                 }
@@ -60,14 +64,14 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             var obj = _unitOfWork.Category.GetAll();
             return Json(new { data = obj });
-        }    
+        }
         [HttpDelete]
         public IActionResult Delete(int id)
         {
             var Obj = _unitOfWork.Category.Get(id);
             if (Obj == null)
             {
-                return Json(new {success=false,message="Error" });
+                return Json(new { success = false, message = "Error" });
             }
             _unitOfWork.Category.Remove(Obj);
             _unitOfWork.Save();

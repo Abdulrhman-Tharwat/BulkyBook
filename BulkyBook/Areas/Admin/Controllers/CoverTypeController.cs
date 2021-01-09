@@ -1,5 +1,7 @@
 ﻿using BulkyBook.DataAccess.Repository.IRepository;
 using BulkyBook.Models;
+using BulkyBook.Utility;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Collections.Generic;
@@ -9,6 +11,8 @@ using System.Threading.Tasks;
 namespace BulkyBook.Areas.Admin.Controllers
 {
     [Area("Admin")]
+    [Authorize(Roles = SD.Role_Admin)]
+
     public class CoverTypeController : Controller
     {
         private readonly IUnitOfWork _unitOfWork;
@@ -20,15 +24,16 @@ namespace BulkyBook.Areas.Admin.Controllers
         public IActionResult Index()
         {
             return View();
-        } public IActionResult Upsert(int? id)
+        }
+        public IActionResult Upsert(int? id)
         {
             CoverType coverType = new CoverType();
-            if(id == null)
+            if (id == null)
             {
                 return View(coverType);
             }
             coverType = _unitOfWork.CoverType.Get(id.GetValueOrDefault());
-            if(coverType == null)
+            if (coverType == null)
             {
                 return NotFound();
             }
@@ -40,7 +45,7 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             if (ModelState.IsValid)
             {
-                if(coverType.Id == 0)
+                if (coverType.Id == 0)
                 {
                     _unitOfWork.CoverType.Add(coverType);
                 }
@@ -60,14 +65,14 @@ namespace BulkyBook.Areas.Admin.Controllers
         {
             var obj = _unitOfWork.CoverType.GetAll();
             return Json(new { data = obj });
-        }    
+        }
         [HttpDelete]
         public IActionResult Delete(int id)
         {
             var Obj = _unitOfWork.CoverType.Get(id);
             if (Obj == null)
             {
-                return Json(new {success=false,message="Error" });
+                return Json(new { success = false, message = "Error" });
             }
             _unitOfWork.CoverType.Remove(Obj);
             _unitOfWork.Save();
