@@ -3,7 +3,7 @@
 $(
     function ()
     {
-        var url = window.location.search;
+        var url = location.search;
         if (url.includes("inprocess")) {
             loadDataTable("GetOrderList?status=inprocess");
         } else

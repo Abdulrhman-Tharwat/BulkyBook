@@ -15,6 +15,9 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Http;
 using BulkyBook.Models;
 using Stripe;
+using Microsoft.Extensions.Options;
+using Twilio;
+using Twilio.Rest.Api.V2010.Account;
 
 namespace BulkyBook.Areas.Customer.Controllers
 {
@@ -23,14 +26,17 @@ namespace BulkyBook.Areas.Customer.Controllers
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IEmailSender _emailSender;
+        private TwilioSettings _TwilioOptions { get; set; }
+
         private readonly UserManager<IdentityUser> _userManager;
         [BindProperty]
-        public ShoppingCartVM ShoppingCartVM { get; set; } 
-        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, UserManager<IdentityUser> userManager)
+        public ShoppingCartVM ShoppingCartVM { get; set; }
+        public CartController(IUnitOfWork unitOfWork, IEmailSender emailSender, UserManager<IdentityUser> userManager,IOptions<TwilioSettings> twilioOptions)
         {
             _unitOfWork = unitOfWork;
             _emailSender = emailSender;
             _userManager = userManager;
+            _TwilioOptions = twilioOptions.Value;
         }
 
         public IActionResult Index()
@@ -226,13 +232,13 @@ namespace BulkyBook.Areas.Customer.Controllers
 
                 Charge charge = Service.Create(Options);
 
-                if (charge.BalanceTransactionId == null)
+                if (charge.Id == null)
                 {
                     ShoppingCartVM.OrderHeader.PaymentStatus = SD.PaymentStatusRejected;
                 }
                 else
                 {
-                    ShoppingCartVM.OrderHeader.TransactionId = charge.BalanceTransactionId;
+                    ShoppingCartVM.OrderHeader.TransactionId = charge.Id;
                 }
                 if (charge.Status.ToLower() == "succeeded")
                 {
@@ -248,7 +254,21 @@ namespace BulkyBook.Areas.Customer.Controllers
 
         public IActionResult OrderConfirmation(int id)
         {
+            OrderHeader orderHeader = _unitOfWork.OrderHeader.GetFirstOrDefault(o => o.Id == id);
+            TwilioClient.Init(_TwilioOptions.AccountSid, _TwilioOptions.AuthToken);
+            try
+            {
+                var message = MessageResource.Create(
+                        body: "Prder Place On BulkyBook. Your Id : " + id,
+                        from: new Twilio.Types.PhoneNumber(_TwilioOptions.PhoneNumber),
+                        to:new Twilio.Types.PhoneNumber(orderHeader.PhoneNumber)
+                        );
+            }
+            catch (Exception ex)
+            {
 
+            }
+                
             return View(id);
         }
     }
